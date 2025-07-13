@@ -76,6 +76,53 @@ func UpdateProduct(c *gin.Context) {
         return
     }
 
+    if name, ok := updateData["name"]; ok {
+        if strName, ok := name.(string); !ok || strName == "" {
+            c.JSON(400, gin.H{
+                "message": "error - Invalid product input",
+                "data":    nil,
+                "error":   "Product name cannot be empty",
+            })
+            return
+        }
+    }
+
+    if price, ok := updateData["price"]; ok {
+        var priceVal float64
+        switch v := price.(type) {
+        case float64:
+            priceVal = v
+        case int:
+            priceVal = float64(v)
+        }
+        if priceVal <= 0 {
+            c.JSON(400, gin.H{
+                "message": "error - Invalid product input",
+                "data":    nil,
+                "error":   "Product price must be greater than 0",
+            })
+            return
+        }
+    }
+	
+    if stock, ok := updateData["stock"]; ok {
+        var stockVal int
+        switch v := stock.(type) {
+        case float64:
+            stockVal = int(v)
+        case int:
+            stockVal = v
+        }
+        if stockVal < 0 {
+            c.JSON(400, gin.H{
+                "message": "error - Invalid product input",
+                "data":    nil,
+                "error":   "Product stock cannot be negative",
+            })
+            return
+        }
+    }
+
     for i, product := range models.Products {
         if id == product.ID {
             if name, ok := updateData["name"].(string); ok {
